@@ -1,0 +1,124 @@
+<style>
+	.hide{
+		display:none;
+	}
+</style>
+
+<div class="row" align="center">
+	<h1>Products Description</h1>
+</div>
+<br />
+<div class="container">
+	<table class="table table-striped">
+  	<thead>
+    	<tr>
+    		  <th>#</th>
+	      	<th>Product Name</th>
+	      	<th>Description</th>
+	      	<th>Brand Name</th>
+	      	<th>Action</th>
+    	</tr>
+  	</thead>
+		<tbody>
+			<%@csv_table.each do |row|%>
+				<tr class="mtr">
+						<% row.each do |key, value| %>
+								<td class="value"><%= value %></td>
+						<% end %>
+						<div>
+							<td>
+						    	<%=link_to "Edit", "#", class: "edit"%>|
+						      <%=link_to "Delete", "#", class: "delete"%>
+					  	</td>
+				  	</div>
+				</tr>
+				<tr class="dtr hide">
+					<% row.each do |key, value| %>
+							<%if key.eql?"Id"%>
+								<td><%=value%></td>
+							<%else%>
+								<td><%= text_field_tag :login_aei2, value, class: 'form-control'%></td>
+							<%end%>
+						<% end %>
+					<td>
+				    <%=link_to "Save", "#", remote: true,  class: "save"%>
+				  </td>
+				</tr>
+			<%end%>
+		</tbody>
+	</table><%=link_to "Add row", "#", class:"new_row"%>
+</div>
+
+
+<script>
+	$(document).ready(function(){
+		function get_cell_data(e){
+			e = e || window.event;
+	    var data = [];
+	    var target = e.srcElement || e.target;
+	    while (target && target.nodeName !== "TR") {
+	        target = target.parentNode;
+	    }
+	    return target;
+		}
+
+		$(".edit").click(function(){
+			var $tr = $(this).closest("tr");
+			$tr.addClass("hide");
+			$(this).closest('tr').next('tr').removeClass("hide");
+			event.preventDefault();
+		});
+
+
+
+		$(".delete").click(function(e){
+			var target = get_cell_data(e);
+			var cells = target.getElementsByTagName("td");
+			$.ajax({
+        url: 'products/delete_row',
+        type: "get",
+        dataType: 'json',
+        data: {"id": cells[0].innerHTML}
+      });
+      window.location.reload();
+		});
+
+$(".new_row").click(function(e){
+	$('table tbody').append(function(e){
+	  return $('<tr class="ntr"><td><%="#"%></td><td><%= text_field_tag :login_aei2,'', class: 'form-control'%></td><td><%= text_field_tag :login_aei2,'', class: 'form-control'%></td><td><%= text_field_tag :login_aei2,'', class: 'form-control'%></td>(<td><%=link_to "Save", "#", remote: true,  class:"save_new"%></td>)</tr>');
+	 });
+		$(".save_new").click(function(e){
+			e = e || window.event;
+	    var data = [];
+	    var target = e.srcElement || e.target;
+	    while (target && target.nodeName !== "TR") {
+	        target = target.parentNode;
+	    }
+	    var cells = target.getElementsByTagName("td");
+	    $.ajax({
+        url: 'products/create_row',
+        type: "get",
+        dataType: 'json',
+        data: {"Product Name": cells[1].children[0].value, "Description":cells[2].children[0].value,"Brand Name":cells[3].children[0].value}
+      });
+      window.location.reload();
+		})
+		e.preventDefault();
+
+});
+
+	$(".save").click(function(e){
+		var target = get_cell_data(e)
+    var cells = target.getElementsByTagName("td");
+
+		$.ajax({
+      url: 'products/save_data',
+      type: "get",
+      dataType: 'json',
+      data: {"id": cells[0].innerHTML, "Product Name": cells[1].children[0].value, "Description":cells[2].children[0].value,"Brand Name":cells[3].children[0].value}
+    });
+    window.location.reload();
+	});
+	});
+</script>
+
